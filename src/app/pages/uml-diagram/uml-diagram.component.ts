@@ -25,6 +25,8 @@ export class UMLDiagramComponent implements OnInit, AfterViewInit, OnDestroy {
   mostrandoAyuda = false;
   puedeDeshacer = false;
   puedeRehacer = false;
+  modoUML25 = true; // true = UML 2.5, false = Estándar
+  tipoFlechaSeleccionada = 'standard'; // Tipo de flecha para el siguiente link
 
   constructor(
     private route: ActivatedRoute,
@@ -132,10 +134,7 @@ export class UMLDiagramComponent implements OnInit, AfterViewInit, OnDestroy {
             fromLinkable: true,
             toLinkable: true,
             cursor: 'pointer',
-            shadowVisible: true,
-            shadowColor: 'rgba(46, 125, 50, 0.4)',
-            shadowBlur: 12,
-            shadowOffset: new go.Point(0, 4)
+            shadowVisible: true
           }
         ),
         $(go.Shape, 'Circle',
@@ -175,10 +174,7 @@ export class UMLDiagramComponent implements OnInit, AfterViewInit, OnDestroy {
             fromLinkable: true,
             toLinkable: true,
             cursor: 'pointer',
-            shadowVisible: true,
-            shadowColor: 'rgba(198, 40, 40, 0.4)',
-            shadowBlur: 12,
-            shadowOffset: new go.Point(0, 4)
+            shadowVisible: true
           }
         ),
         $(go.Shape, 'Circle',
@@ -219,10 +215,7 @@ export class UMLDiagramComponent implements OnInit, AfterViewInit, OnDestroy {
             cursor: 'pointer',
             minSize: new go.Size(140, 70),
             parameter1: 12,
-            shadowVisible: true,
-            shadowColor: 'rgba(30, 58, 138, 0.25)',
-            shadowBlur: 10,
-            shadowOffset: new go.Point(0, 3)
+            shadowVisible: true
           },
           new go.Binding('fill', 'fill')
         ),
@@ -257,10 +250,7 @@ export class UMLDiagramComponent implements OnInit, AfterViewInit, OnDestroy {
             fromLinkable: true,
             toLinkable: true,
             cursor: 'pointer',
-            shadowVisible: true,
-            shadowColor: 'rgba(245, 127, 23, 0.3)',
-            shadowBlur: 10,
-            shadowOffset: new go.Point(0, 3)
+            shadowVisible: true
           }
         ),
         $(go.TextBlock,
@@ -278,12 +268,12 @@ export class UMLDiagramComponent implements OnInit, AfterViewInit, OnDestroy {
       )
     );
 
-    // Template para NOTA (rectángulo con esquina doblada y sombra)
+    // Template para NOTA (rectángulo redondeado con sombra)
     this.diagram.nodeTemplateMap.add('Note',
       $(go.Node, 'Auto',
         { locationSpot: go.Spot.Center },
         new go.Binding('location', 'loc', go.Point.parse).makeTwoWay(go.Point.stringify),
-        $(go.Shape, 'File',
+        $(go.Shape, 'RoundedRectangle',
           {
             fill: $(go.Brush, 'Linear', { 0: '#FFFDE7', 1: '#FFF9C4' }),
             stroke: '#FBC02D',
@@ -293,10 +283,8 @@ export class UMLDiagramComponent implements OnInit, AfterViewInit, OnDestroy {
             toLinkable: true,
             cursor: 'pointer',
             minSize: new go.Size(120, 80),
-            shadowVisible: true,
-            shadowColor: 'rgba(251, 192, 45, 0.3)',
-            shadowBlur: 8,
-            shadowOffset: new go.Point(0, 2)
+            parameter1: 8,
+            shadowVisible: true
           }
         ),
         $(go.TextBlock,
@@ -330,10 +318,7 @@ export class UMLDiagramComponent implements OnInit, AfterViewInit, OnDestroy {
             fromLinkable: true,
             toLinkable: true,
             cursor: 'pointer',
-            shadowVisible: true,
-            shadowColor: 'rgba(0, 0, 0, 0.5)',
-            shadowBlur: 12,
-            shadowOffset: new go.Point(0, 3)
+            shadowVisible: true
           }
         ),
         $(go.TextBlock, 'FORK',
@@ -362,10 +347,7 @@ export class UMLDiagramComponent implements OnInit, AfterViewInit, OnDestroy {
             fromLinkable: true,
             toLinkable: true,
             cursor: 'pointer',
-            shadowVisible: true,
-            shadowColor: 'rgba(0, 0, 0, 0.5)',
-            shadowBlur: 12,
-            shadowOffset: new go.Point(0, 3)
+            shadowVisible: true
           }
         ),
         $(go.TextBlock, 'JOIN',
@@ -404,229 +386,92 @@ export class UMLDiagramComponent implements OnInit, AfterViewInit, OnDestroy {
         )
       );
 
-    // Template para LINKS (flechas/conexiones con figuras UML 2.5)
+    // Template para LINKS ESTÁNDAR (flechas simples)
     this.diagram.linkTemplate =
       $(go.Link,
         {
           routing: go.Routing.AvoidsNodes,
           corner: 10,
-          toShortLength: 6,
           relinkableFrom: true,
           relinkableTo: true,
-          reshapable: true,
-          resegmentable: true,
           curve: go.Curve.JumpOver
         },
-        $(go.Shape,
-          {
-            strokeWidth: 3,
-            stroke: '#1e3a8a',
-            strokeDashArray: null
-          }
+        $(go.Shape, 
+          { strokeWidth: 3, stroke: '#1e3a8a' },
+          new go.Binding('strokeDashArray', 'tipoFlecha', (tipo) => {
+            return tipo === 'dependency' ? [6, 3] : null;
+          })
         ),
-        $(go.Shape,
-          {
-            toArrow: 'Triangle',
-            stroke: '#1e3a8a',
-            fill: '#1e3a8a',
-            scale: 2.2,
-            strokeWidth: 2
-          }
-        ),
-        $(go.Panel, 'Auto',
-          {
-            visible: true
-          },
-          new go.Binding('visible', 'text', (t) => t !== undefined && t !== ''),
-          $(go.Shape, 'RoundedRectangle',
-            {
-              fill: 'white',
-              stroke: '#1e3a8a',
-              strokeWidth: 1.5,
-              parameter1: 6
+        $(go.Shape, 
+          { toArrow: 'Triangle', fill: '#1e3a8a', stroke: '#1e3a8a', scale: 2 },
+          new go.Binding('toArrow', 'tipoFlecha', (tipo) => {
+            switch(tipo) {
+              case 'generalization': return 'Triangle';
+              case 'realization': return 'Triangle';
+              case 'dependency': return 'OpenTriangle';
+              case 'association': return 'OpenTriangle';
+              case 'aggregation': return 'StretchedDiamond';
+              case 'composition': return 'StretchedDiamond';
+              default: return 'Triangle';
             }
-          ),
-          $(go.TextBlock,
-            {
-              segmentOffset: new go.Point(0, -10),
-              segmentOrientation: go.Orientation.Upright,
-              font: 'bold 12px "Segoe UI", sans-serif',
-              editable: true,
-              margin: new go.Margin(5, 8, 5, 8),
-              stroke: '#1e3a8a'
-            },
-            new go.Binding('text', 'text').makeTwoWay()
-          )
+          }),
+          new go.Binding('fill', 'tipoFlecha', (tipo) => {
+            return (tipo === 'composition') ? '#1e3a8a' : 'white';
+          }),
+          new go.Binding('stroke', 'tipoFlecha', () => '#1e3a8a')
+        ),
+        $(go.TextBlock,
+          {
+            segmentOffset: new go.Point(0, -10),
+            font: 'bold 12px Arial',
+            editable: true
+          },
+          new go.Binding('text', 'text').makeTwoWay()
         )
       );
 
-    // Template para CONTROL FLOW (flujo de control - flecha sólida)
-    this.diagram.linkTemplateMap.add('ControlFlow',
+    // Template para LINKS UML 2.5 (flechas especializadas)
+    this.diagram.linkTemplateMap.add('uml25',
       $(go.Link,
         {
           routing: go.Routing.AvoidsNodes,
           corner: 10,
-          toShortLength: 6,
           relinkableFrom: true,
           relinkableTo: true,
-          reshapable: true,
-          resegmentable: true,
           curve: go.Curve.JumpOver
         },
-        $(go.Shape,
-          {
-            strokeWidth: 3,
-            stroke: '#1e3a8a',
-            strokeDashArray: null
-          }
+        $(go.Shape, 
+          { strokeWidth: 2.5, stroke: '#1e3a8a' },
+          new go.Binding('strokeDashArray', 'tipoFlecha', (tipo) => {
+            return (tipo === 'dependency' || tipo === 'realization') ? [6, 3] : null;
+          })
         ),
-        $(go.Shape,
-          {
-            toArrow: 'Triangle',
-            stroke: '#1e3a8a',
-            fill: '#1e3a8a',
-            scale: 2.2,
-            strokeWidth: 2
-          }
-        ),
-        $(go.Panel, 'Auto',
-          {
-            visible: true
-          },
-          new go.Binding('visible', 'text', (t) => t !== undefined && t !== ''),
-          $(go.Shape, 'RoundedRectangle',
-            {
-              fill: 'white',
-              stroke: '#1e3a8a',
-              strokeWidth: 1.5,
-              parameter1: 6
+        $(go.Shape, 
+          { toArrow: 'Triangle', fill: 'white', stroke: '#1e3a8a', scale: 1.8 },
+          new go.Binding('toArrow', 'tipoFlecha', (tipo) => {
+            switch(tipo) {
+              case 'generalization': return 'Triangle';
+              case 'realization': return 'Triangle';
+              case 'dependency': return 'OpenTriangle';
+              case 'association': return 'OpenTriangle';
+              case 'aggregation': return 'StretchedDiamond';
+              case 'composition': return 'StretchedDiamond';
+              default: return 'OpenTriangle';
             }
-          ),
-          $(go.TextBlock,
-            {
-              segmentOffset: new go.Point(0, -10),
-              segmentOrientation: go.Orientation.Upright,
-              font: 'bold 12px "Segoe UI", sans-serif',
-              editable: true,
-              margin: new go.Margin(5, 8, 5, 8),
-              stroke: '#1e3a8a'
-            },
-            new go.Binding('text', 'text').makeTwoWay()
-          )
-        )
-      )
-    );
-
-    // Template para OBJECT FLOW (flujo de objetos - flecha abierta)
-    this.diagram.linkTemplateMap.add('ObjectFlow',
-      $(go.Link,
-        {
-          routing: go.Routing.AvoidsNodes,
-          corner: 10,
-          toShortLength: 6,
-          relinkableFrom: true,
-          relinkableTo: true,
-          reshapable: true,
-          resegmentable: true,
-          curve: go.Curve.JumpOver
-        },
-        $(go.Shape,
-          {
-            strokeWidth: 3,
-            stroke: '#7c3aed',
-            strokeDashArray: null
-          }
+          }),
+          new go.Binding('fill', 'tipoFlecha', (tipo) => {
+            return (tipo === 'composition' || tipo === 'generalization') ? '#1e3a8a' : 'white';
+          })
         ),
-        $(go.Shape,
+        $(go.TextBlock,
           {
-            toArrow: 'OpenTriangle',
-            stroke: '#7c3aed',
-            fill: null,
-            scale: 2.5,
-            strokeWidth: 3
-          }
-        ),
-        $(go.Panel, 'Auto',
-          {
-            visible: true
+            segmentOffset: new go.Point(0, -10),
+            font: '11px Arial',
+            editable: true,
+            background: 'white',
+            margin: 2
           },
-          new go.Binding('visible', 'text', (t) => t !== undefined && t !== ''),
-          $(go.Shape, 'RoundedRectangle',
-            {
-              fill: 'white',
-              stroke: '#7c3aed',
-              strokeWidth: 1.5,
-              parameter1: 6
-            }
-          ),
-          $(go.TextBlock,
-            {
-              segmentOffset: new go.Point(0, -10),
-              segmentOrientation: go.Orientation.Upright,
-              font: 'bold 12px "Segoe UI", sans-serif',
-              editable: true,
-              margin: new go.Margin(5, 8, 5, 8),
-              stroke: '#7c3aed'
-            },
-            new go.Binding('text', 'text').makeTwoWay()
-          )
-        )
-      )
-    );
-
-    // Template para DEPENDENCY (dependencia - flecha punteada)
-    this.diagram.linkTemplateMap.add('Dependency',
-      $(go.Link,
-        {
-          routing: go.Routing.AvoidsNodes,
-          corner: 10,
-          toShortLength: 6,
-          relinkableFrom: true,
-          relinkableTo: true,
-          reshapable: true,
-          resegmentable: true,
-          curve: go.Curve.JumpOver
-        },
-        $(go.Shape,
-          {
-            strokeWidth: 2.5,
-            stroke: '#f59e0b',
-            strokeDashArray: [8, 4]
-          }
-        ),
-        $(go.Shape,
-          {
-            toArrow: 'OpenTriangle',
-            stroke: '#f59e0b',
-            fill: null,
-            scale: 2.2,
-            strokeWidth: 2.5
-          }
-        ),
-        $(go.Panel, 'Auto',
-          {
-            visible: true
-          },
-          new go.Binding('visible', 'text', (t) => t !== undefined && t !== ''),
-          $(go.Shape, 'RoundedRectangle',
-            {
-              fill: 'white',
-              stroke: '#f59e0b',
-              strokeWidth: 1.5,
-              parameter1: 6
-            }
-          ),
-          $(go.TextBlock,
-            {
-              segmentOffset: new go.Point(0, -10),
-              segmentOrientation: go.Orientation.Upright,
-              font: 'bold 11px "Segoe UI", sans-serif',
-              editable: true,
-              margin: new go.Margin(4, 7, 4, 7),
-              stroke: '#f59e0b'
-            },
-            new go.Binding('text', 'text').makeTwoWay()
-          )
+          new go.Binding('text', 'text').makeTwoWay()
         )
       )
     );
@@ -748,6 +593,11 @@ export class UMLDiagramComponent implements OnInit, AfterViewInit, OnDestroy {
       [...swimlanes, ...nodos],
       links
     );
+    
+    console.log('Diagrama creado con:', {
+      nodos: this.diagram.model.nodeDataArray.length,
+      links: (this.diagram.model as go.GraphLinksModel).linkDataArray.length
+    });
   }
 
   agregarSwimlane(): void {
@@ -868,5 +718,46 @@ export class UMLDiagramComponent implements OnInit, AfterViewInit, OnDestroy {
 
   volver(): void {
     this.router.navigate(['/politicas']);
+  }
+
+  cambiarModoFlecha(): void {
+    this.modoUML25 = !this.modoUML25;
+    
+    // Actualizar todas las conexiones existentes
+    const model = this.diagram.model as go.GraphLinksModel;
+    this.diagram.startTransaction('cambiar modo');
+    
+    model.linkDataArray.forEach((linkData: any) => {
+      if (this.modoUML25) {
+        model.set(linkData, 'category', 'uml25');
+        if (!linkData.tipoFlecha) {
+          model.set(linkData, 'tipoFlecha', 'association');
+        }
+      } else {
+        model.set(linkData, 'category', '');
+        model.set(linkData, 'tipoFlecha', 'standard');
+      }
+    });
+    
+    this.diagram.commitTransaction('cambiar modo');
+    
+    alert(this.modoUML25 
+      ? '✅ Modo UML 2.5 activado - Flechas especializadas disponibles' 
+      : '✅ Modo Estándar activado - Flechas simples');
+  }
+
+  seleccionarTipoFlecha(tipo: string): void {
+    this.tipoFlechaSeleccionada = tipo;
+    
+    // Si hay un link seleccionado, cambiar su tipo
+    const selection = this.diagram.selection.first();
+    if (selection instanceof go.Link) {
+      this.diagram.startTransaction('cambiar tipo flecha');
+      this.diagram.model.set(selection.data, 'tipoFlecha', tipo);
+      if (this.modoUML25) {
+        this.diagram.model.set(selection.data, 'category', 'uml25');
+      }
+      this.diagram.commitTransaction('cambiar tipo flecha');
+    }
   }
 }

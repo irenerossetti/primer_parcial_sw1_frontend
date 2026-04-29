@@ -6,13 +6,13 @@
 }
 
 .diagram-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
   border-bottom: none;
   padding: 18px 28px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 6px 20px rgba(30, 58, 138, 0.3);
   position: relative;
   z-index: 10;
 }
@@ -25,9 +25,9 @@
   right: 0;
   height: 4px;
   background: linear-gradient(90deg, 
-    rgba(102, 126, 234, 0.8) 0%, 
-    rgba(118, 75, 162, 0.8) 50%, 
-    rgba(102, 126, 234, 0.8) 100%);
+    rgba(30, 58, 138, 0.8) 0%, 
+    rgba(30, 64, 175, 0.8) 50%, 
+    rgba(30, 58, 138, 0.8) 100%);
   filter: blur(2px);
 }
 
@@ -118,7 +118,7 @@
 
 .btn-primary {
   background: white;
-  color: #667eea;
+  color: #1e3a8a;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
@@ -167,7 +167,7 @@
   display: flex;
   gap: 6px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-  border: 1px solid rgba(102, 126, 234, 0.2);
+  border: 1px solid rgba(30, 58, 138, 0.2);
   backdrop-filter: blur(10px);
 }
 
@@ -187,14 +187,14 @@
   position: absolute;
   inset: 0;
   border-radius: 10px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, #1e3a8a, #1e40af);
   opacity: 0;
   transition: opacity 0.2s;
 }
 
 .diagram-toolbar button:hover:not(:disabled) {
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
-  color: #667eea;
+  background: linear-gradient(135deg, rgba(30, 58, 138, 0.1), rgba(30, 64, 175, 0.1));
+  color: #1e3a8a;
   transform: translateY(-2px);
 }
 
@@ -212,7 +212,7 @@
 .properties-panel {
   width: 340px;
   background: white;
-  border-left: 1px solid rgba(102, 126, 234, 0.2);
+  border-left: 1px solid rgba(30, 58, 138, 0.2);
   display: flex;
   flex-direction: column;
   box-shadow: -4px 0 20px rgba(0, 0, 0, 0.08);
@@ -220,12 +220,12 @@
 
 .panel-header {
   padding: 18px;
-  border-bottom: 3px solid #667eea;
+  border-bottom: 3px solid #1e3a8a;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3);
 }
 
 .panel-header h3 {
@@ -285,8 +285,8 @@
 
 .form-control:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+  border-color: #1e3a8a;
+  box-shadow: 0 0 0 4px rgba(30, 58, 138, 0.1);
 }
 
 .modal {
@@ -337,12 +337,12 @@
 
 .modal-header {
   padding: 24px;
-  border-bottom: 3px solid #667eea;
+  border-bottom: 3px solid #1e3a8a;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3);
 }
 
 .modal-header h2 {
@@ -360,7 +360,7 @@
 }
 
 .modal-body h3 {
-  color: #667eea;
+  color: #1e3a8a;
   margin-top: 24px;
   margin-bottom: 14px;
   font-size: 1.2rem;
@@ -398,11 +398,183 @@
 
 .panel-content::-webkit-scrollbar-thumb,
 .modal-body::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, #1e3a8a, #1e40af);
   border-radius: 10px;
 }
 
 .panel-content::-webkit-scrollbar-thumb:hover,
 .modal-body::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #764ba2, #667eea);
+  background: linear-gradient(135deg, #1e40af, #1e3a8a);
+}
+
+/* Botón de Modo de Flecha */
+.btn-modo-flecha {
+  background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%) !important;
+  color: white !important;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-modo-flecha:hover {
+  background: linear-gradient(135deg, #7B1FA2 0%, #6A1B9A 100%) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(156, 39, 176, 0.3);
+}
+
+.btn-modo-flecha.modo-uml25 {
+  background: linear-gradient(135deg, #FF6F00 0%, #E65100 100%) !important;
+}
+
+.btn-modo-flecha.modo-uml25:hover {
+  background: linear-gradient(135deg, #E65100 0%, #BF360C 100%) !important;
+  box-shadow: 0 4px 12px rgba(255, 111, 0, 0.3);
+}
+
+/* Panel de Tipos de Flechas UML 2.5 */
+.flechas-panel {
+  position: fixed;
+  right: 20px;
+  top: 120px;
+  width: 280px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  animation: slideInRight 0.3s ease;
+}
+
+.flechas-header {
+  padding: 16px;
+  background: linear-gradient(135deg, #FF6F00 0%, #E65100 100%);
+  border-radius: 12px 12px 0 0;
+  color: white;
+}
+
+.flechas-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.flechas-lista {
+  padding: 12px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.flecha-item {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 8px;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.flecha-item:hover {
+  border-color: #FF6F00;
+  background: #FFF3E0;
+  transform: translateX(4px);
+}
+
+.flecha-item.selected {
+  border-color: #FF6F00;
+  background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
+  box-shadow: 0 2px 8px rgba(255, 111, 0, 0.2);
+}
+
+.flecha-visual {
+  width: 60px;
+  height: 24px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.linea-solida {
+  width: 45px;
+  height: 2px;
+  background: #1e3a8a;
+}
+
+.linea-punteada {
+  width: 45px;
+  height: 2px;
+  background: repeating-linear-gradient(
+    to right,
+    #1e3a8a 0px,
+    #1e3a8a 6px,
+    transparent 6px,
+    transparent 9px
+  );
+}
+
+.punta-abierta {
+  width: 0;
+  height: 0;
+  border-left: 10px solid #1e3a8a;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-right: none;
+  background: transparent;
+}
+
+.punta-cerrada {
+  width: 0;
+  height: 0;
+  border-left: 10px solid #1e3a8a;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+}
+
+.diamante-abierto {
+  width: 12px;
+  height: 12px;
+  border: 2px solid #1e3a8a;
+  background: white;
+  transform: rotate(45deg);
+}
+
+.diamante-cerrado {
+  width: 12px;
+  height: 12px;
+  background: #1e3a8a;
+  transform: rotate(45deg);
+}
+
+.flecha-nombre {
+  flex: 1;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.flechas-ayuda {
+  padding: 12px 16px;
+  background: #FFF3E0;
+  border-top: 1px solid #FFE0B2;
+  border-radius: 0 0 12px 12px;
+}
+
+.flechas-ayuda p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #E65100;
+  line-height: 1.4;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }

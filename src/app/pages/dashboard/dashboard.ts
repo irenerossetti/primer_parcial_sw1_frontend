@@ -16,6 +16,22 @@ Chart.register(...registerables);
         <p>Métricas y análisis del sistema</p>
       </div>
 
+      <!-- Mensaje de error -->
+      <div class="error-message" *ngIf="errorCarga">
+        <span class="material-icons">error</span>
+        <div>
+          <p>{{ errorCarga }}</p>
+          <p *ngIf="rolActual" style="margin-top: 8px; font-size: 0.9em;">
+            Tu rol actual es: <strong>{{ rolActual }}</strong>
+          </p>
+          <button *ngIf="rolActual === 'CLIENTE'" 
+                  style="margin-top: 10px; padding: 8px 16px; background: #1e3a8a; color: white; border: none; border-radius: 4px; cursor: pointer;"
+                  (click)="volverAInicio()">
+            Volver a mi panel
+          </button>
+        </div>
+      </div>
+
       <!-- Tarjetas de estadísticas -->
       <div class="stats-grid">
         <div class="stat-card">
@@ -23,7 +39,7 @@ Chart.register(...registerables);
             <span class="material-icons">receipt</span>
           </div>
           <div class="stat-info">
-            <h3>{{ resumen?.total || 0 }}</h3>
+            <h3>{{ resumen.total }}</h3>
             <p>Total Trámites</p>
           </div>
         </div>
@@ -32,7 +48,7 @@ Chart.register(...registerables);
             <span class="material-icons">schedule</span>
           </div>
           <div class="stat-info">
-            <h3>{{ resumen?.enProceso || 0 }}</h3>
+            <h3>{{ resumen.enProceso }}</h3>
             <p>En Proceso</p>
           </div>
         </div>
@@ -41,7 +57,7 @@ Chart.register(...registerables);
             <span class="material-icons">check_circle</span>
           </div>
           <div class="stat-info">
-            <h3>{{ resumen?.completados || 0 }}</h3>
+            <h3>{{ resumen.completados }}</h3>
             <p>Completados</p>
           </div>
         </div>
@@ -50,7 +66,7 @@ Chart.register(...registerables);
             <span class="material-icons">trending_up</span>
           </div>
           <div class="stat-info">
-            <h3>{{ resumen?.tasaExito || 0 }}%</h3>
+            <h3>{{ resumen.tasaExito }}%</h3>
             <p>Tasa de Éxito</p>
           </div>
         </div>
@@ -82,7 +98,7 @@ Chart.register(...registerables);
             <div class="rendimiento-stats">
               <div class="stat-item">
                 <span class="label">Total:</span>
-                <span class="value">{{ dept.totalTramites }}</span>
+                <span class="value">{{ dept.total }}</span>
               </div>
               <div class="stat-item">
                 <span class="label">Completados:</span>
@@ -90,11 +106,11 @@ Chart.register(...registerables);
               </div>
               <div class="stat-item">
                 <span class="label">Tiempo Promedio:</span>
-                <span class="value">{{ dept.tiempoPromedio }}h</span>
+                <span class="value">{{ dept.tiempoPromedioHoras }}h</span>
               </div>
               <div class="stat-item">
-                <span class="label">Tasa Éxito:</span>
-                <span class="value success">{{ dept.tasaExito }}%</span>
+                <span class="label">Eficiencia:</span>
+                <span class="value success">{{ dept.eficiencia }}%</span>
               </div>
             </div>
           </div>
@@ -230,6 +246,22 @@ Chart.register(...registerables);
     .stat-item .label { color: #666; }
     .stat-item .value { font-weight: 600; color: #2c3e50; }
     .stat-item .value.success { color: #2e7d32; }
+
+    .error-message {
+      background: #fee;
+      border: 1px solid #fcc;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #c33;
+    }
+
+    .error-message .material-icons {
+      font-size: 24px;
+    }
   `]
 })
 export class DashboardComponent implements OnInit, AfterViewInit {
@@ -237,8 +269,17 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   @ViewChild('departamentoChart') departamentoChartRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('tendenciaChart') tendenciaChartRef!: ElementRef<HTMLCanvasElement>;
 
-  resumen: any = null;
+  resumen: any = {
+    total: 0,
+    nuevos: 0,
+    enProceso: 0,
+    completados: 0,
+    rechazados: 0,
+    tasaExito: 0
+  };
   rendimientoDepartamentos: any[] = [];
+  errorCarga: string = '';
+  rolActual: string = '';
 
   private estadoChart?: Chart;
   private departamentoChart?: Chart;
@@ -247,8 +288,48 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   constructor(private kpiService: KPIService) {}
 
   ngOnInit() {
+    // Verificar si el usuario está autenticado
+    const token = localStorage.getItem('token');
+    this.rolActual = localStorage.getItem('rol') || '';
+    
+    console.log('=== DIAGNÓSTICO DASHBOARD ===');
+    console.log('Token existe:', !!token);
+    console.log('Rol en localStorage:', this.rolActual);
+    console.log('Nombre usuario:', localStorage.getItem('nombre'));
+    
+    if (!token) {
+      this.errorCarga = 'No estás autenticado. Por favor inicia sesión.';
+      console.error('No hay token de autenticación');
+      return;
+    }
+
+    // Verificar el rol
+    if (this.rolActual === 'CLIENTE') {
+      this.errorCarga = 'El dashboard es solo para administradores y funcionarios. Los clientes deben usar el panel de cliente.';
+      console.warn('Usuario con rol CLIENTE intentando acceder al dashboard');
+      return;
+    }
+
+    if (!this.rolActual || (this.rolActual !== 'ADMIN' && this.rolActual !== 'FUNCIONARIO')) {
+      this.errorCarga = 'Tu rol no está configurado correctamente. Por favor contacta al administrador.';
+      console.error('Rol inválido:', this.rolActual);
+      return;
+    }
+
+    console.log('Usuario autorizado, cargando datos...');
     this.cargarResumen();
     this.cargarRendimientoDepartamentos();
+  }
+
+  volverAInicio() {
+    const rol = localStorage.getItem('rol');
+    if (rol === 'CLIENTE') {
+      window.location.href = '/cliente';
+    } else if (rol === 'FUNCIONARIO') {
+      window.location.href = '/funcionario';
+    } else {
+      window.location.href = '/login';
+    }
   }
 
   ngAfterViewInit() {
@@ -265,8 +346,18 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       next: (data) => {
         console.log('Resumen recibido:', data);
         this.resumen = data;
+        this.errorCarga = '';
       },
-      error: (err) => console.error('Error al cargar resumen:', err)
+      error: (err) => {
+        console.error('Error al cargar resumen:', err);
+        if (err.status === 403) {
+          this.errorCarga = 'No tienes permisos para ver el dashboard. Necesitas rol ADMIN o FUNCIONARIO.';
+        } else if (err.status === 401) {
+          this.errorCarga = 'Tu sesión ha expirado. Por favor inicia sesión nuevamente.';
+        } else {
+          this.errorCarga = `Error al cargar datos: ${err.message || 'Error desconocido'}`;
+        }
+      }
     });
   }
 
@@ -277,7 +368,9 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         console.log('Rendimiento recibido:', data);
         this.rendimientoDepartamentos = data;
       },
-      error: (err) => console.error('Error al cargar rendimiento:', err)
+      error: (err) => {
+        console.error('Error al cargar rendimiento:', err);
+      }
     });
   }
 

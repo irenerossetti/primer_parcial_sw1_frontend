@@ -47,3 +47,10 @@ Thumbs.db
 
 # Keep example file
 !/src/environments/environment.example.ts
+
+# Archivos de documentación temporal
+*.md
+!README.md
+*.txt
+*.html
+!src/**/*.html

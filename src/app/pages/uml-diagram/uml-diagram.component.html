@@ -15,6 +15,14 @@
         <span class="material-icons">view_week</span>
         Agregar Swimlane
       </button>
+      <button 
+        (click)="cambiarModoFlecha()" 
+        class="btn-action btn-modo-flecha"
+        [class.modo-uml25]="modoUML25"
+        [title]="modoUML25 ? 'Cambiar a Modo Estándar' : 'Cambiar a Modo UML 2.5'">
+        <span class="material-icons">{{ modoUML25 ? 'account_tree' : 'arrow_forward' }}</span>
+        {{ modoUML25 ? 'UML 2.5' : 'Estándar' }}
+      </button>
       <button (click)="validarDiagrama()" class="btn-action">
         <span class="material-icons">check_circle</span>
         Validar
@@ -72,6 +80,89 @@
           <textarea [(ngModel)]="nodoSeleccionado.descripcion" class="form-control" rows="3"></textarea>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Panel de Tipos de Flechas UML 2.5 -->
+  <div class="flechas-panel" *ngIf="modoUML25">
+    <div class="flechas-header">
+      <h3>🎯 Tipos de Flechas UML 2.5</h3>
+    </div>
+    <div class="flechas-lista">
+      <button 
+        class="flecha-item" 
+        [class.selected]="tipoFlechaSeleccionada === 'association'"
+        (click)="seleccionarTipoFlecha('association')"
+        title="Asociación - Relación general entre elementos">
+        <div class="flecha-visual">
+          <div class="linea-solida"></div>
+          <div class="punta-abierta"></div>
+        </div>
+        <span class="flecha-nombre">Asociación</span>
+      </button>
+
+      <button 
+        class="flecha-item" 
+        [class.selected]="tipoFlechaSeleccionada === 'generalization'"
+        (click)="seleccionarTipoFlecha('generalization')"
+        title="Generalización - Herencia o especialización">
+        <div class="flecha-visual">
+          <div class="linea-solida"></div>
+          <div class="punta-cerrada"></div>
+        </div>
+        <span class="flecha-nombre">Generalización</span>
+      </button>
+
+      <button 
+        class="flecha-item" 
+        [class.selected]="tipoFlechaSeleccionada === 'dependency'"
+        (click)="seleccionarTipoFlecha('dependency')"
+        title="Dependencia - Un elemento depende de otro">
+        <div class="flecha-visual">
+          <div class="linea-punteada"></div>
+          <div class="punta-abierta"></div>
+        </div>
+        <span class="flecha-nombre">Dependencia</span>
+      </button>
+
+      <button 
+        class="flecha-item" 
+        [class.selected]="tipoFlechaSeleccionada === 'realization'"
+        (click)="seleccionarTipoFlecha('realization')"
+        title="Realización - Implementación de interfaz">
+        <div class="flecha-visual">
+          <div class="linea-punteada"></div>
+          <div class="punta-cerrada"></div>
+        </div>
+        <span class="flecha-nombre">Realización</span>
+      </button>
+
+      <button 
+        class="flecha-item" 
+        [class.selected]="tipoFlechaSeleccionada === 'aggregation'"
+        (click)="seleccionarTipoFlecha('aggregation')"
+        title="Agregación - Relación todo-parte (débil)">
+        <div class="flecha-visual">
+          <div class="linea-solida"></div>
+          <div class="diamante-abierto"></div>
+        </div>
+        <span class="flecha-nombre">Agregación</span>
+      </button>
+
+      <button 
+        class="flecha-item" 
+        [class.selected]="tipoFlechaSeleccionada === 'composition'"
+        (click)="seleccionarTipoFlecha('composition')"
+        title="Composición - Relación todo-parte (fuerte)">
+        <div class="flecha-visual">
+          <div class="linea-solida"></div>
+          <div class="diamante-cerrado"></div>
+        </div>
+        <span class="flecha-nombre">Composición</span>
+      </button>
+    </div>
+    <div class="flechas-ayuda">
+      <p>💡 Selecciona un tipo y haz clic en una flecha existente para cambiarla</p>
     </div>
   </div>
 

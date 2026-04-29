@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: workflow-frontend
+    env: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist/diagram/browser
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: NODE_ENV
+        value: production
