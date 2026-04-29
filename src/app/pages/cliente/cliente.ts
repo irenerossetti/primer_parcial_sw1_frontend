@@ -384,7 +384,6 @@ calcularFechaEstimada(tramite: Tramite): string {
       alert('Error al descargar PDF: ' + (error instanceof Error ? error.message : 'Error desconocido'));
     }
   }
-  }
 
   // Descargar PDF solo del recorrido visual
   async descargarRecorridoPDF(tramite: Tramite) {
@@ -404,4 +403,4 @@ calcularFechaEstimada(tramite: Tramite): string {
   logout() {
     this.authService.logout();
   }
-}  // ← ESTA ES LA LLAVE DE CIERRE DE LA CLASE
+}
