@@ -384,6 +384,7 @@ calcularFechaEstimada(tramite: Tramite): string {
       alert('Error al descargar PDF: ' + (error instanceof Error ? error.message : 'Error desconocido'));
     }
   }
+  }
 
   // Descargar PDF solo del recorrido visual
   async descargarRecorridoPDF(tramite: Tramite) {
