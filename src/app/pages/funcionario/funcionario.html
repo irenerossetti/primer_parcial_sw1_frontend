@@ -1,0 +1,215 @@
+<div class="funcionario-container">
+  <!-- Header con información del funcionario -->
+  <div class="header">
+    <div>
+      <h1>Panel de Trabajo</h1>
+      <p class="subtitle">Departamento: {{ departamentoFuncionario }}</p>
+    </div>
+    <div class="user-info">
+      <div class="user-details">
+        <span class="user-name">{{ nombreUsuario }}</span>
+        <span class="user-email">{{ emailUsuario }}</span>
+      </div>
+      <button class="btn-logout" (click)="logout()">
+        <span class="material-icons">logout</span>
+        Salir
+      </button>
+    </div>
+  </div>
+
+  <!-- Filtros mejorados -->
+  <div class="filtros-bar">
+    <div class="filtros">
+      <span class="material-icons">filter_list</span>
+      <select [(ngModel)]="filtroEstado" (change)="aplicarFiltro()">
+        <option value="todos">Todos los estados</option>
+        <option value="NUEVO">Nuevos</option>
+        <option value="EN_PROCESO">En Proceso</option>
+        <option value="PENDIENTE">Pendiente</option>
+        <option value="EN_MORA">En Mora</option>
+        <option value="COMPLETADO">Completados</option>
+        <option value="RECHAZADO">Rechazados</option>
+      </select>
+    </div>
+    
+    <div class="search-box">
+      <span class="material-icons">search</span>
+      <input type="text" [(ngModel)]="filtroBusqueda" (input)="aplicarFiltro()" 
+             placeholder="Buscar por código o cliente..." class="search-input">
+    </div>
+    
+    <button class="btn-refresh" (click)="cargarTramites()" [disabled]="loading">
+      <span class="material-icons">refresh</span>
+      Actualizar
+    </button>
+  </div>
+
+  <!-- Stats cards mejorados -->
+  <div class="stats-grid">
+    <div class="stat-card" [class.active]="filtroEstado === 'todos'" (click)="filtroEstado='todos'; aplicarFiltro()">
+      <div class="stat-icon total"><span class="material-icons">assignment</span></div>
+      <div class="stat-info"><h3>Total</h3><p>{{ tramites.length }}</p></div>
+    </div>
+    <div class="stat-card" [class.active]="filtroEstado === 'NUEVO'" (click)="filtroEstado='NUEVO'; aplicarFiltro()">
+      <div class="stat-icon nuevo"><span class="material-icons">fiber_new</span></div>
+      <div class="stat-info"><h3>Nuevos</h3><p>{{ contarPorEstado('NUEVO') }}</p></div>
+    </div>
+    <div class="stat-card" [class.active]="filtroEstado === 'EN_PROCESO'" (click)="filtroEstado='EN_PROCESO'; aplicarFiltro()">
+      <div class="stat-icon proceso"><span class="material-icons">autorenew</span></div>
+      <div class="stat-info"><h3>En Proceso</h3><p>{{ contarPorEstado('EN_PROCESO') }}</p></div>
+    </div>
+    <div class="stat-card" [class.active]="filtroEstado === 'PENDIENTE'" (click)="filtroEstado='PENDIENTE'; aplicarFiltro()">
+      <div class="stat-icon pendiente"><span class="material-icons">hourglass_empty</span></div>
+      <div class="stat-info"><h3>Pendiente</h3><p>{{ contarPorEstado('PENDIENTE') }}</p></div>
+    </div>
+    <div class="stat-card" [class.active]="filtroEstado === 'COMPLETADO'" (click)="filtroEstado='COMPLETADO'; aplicarFiltro()">
+      <div class="stat-icon completado"><span class="material-icons">check_circle</span></div>
+      <div class="stat-info"><h3>Completados</h3><p>{{ contarPorEstado('COMPLETADO') }}</p></div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading"><div class="spinner"></div><p>Cargando trámites...</p></div>
+
+  <!-- Lista de trámites con diseño mejorado -->
+  <div *ngIf="!loading" class="tramites-lista">
+    <div *ngFor="let tramite of tramitesFiltrados" class="tramite-card" [class]="getColorClass(tramite)">
+      <div class="card-header">
+        <div class="codigo">
+          <span class="material-icons">description</span>
+          <strong>{{ tramite.codigo }}</strong>
+        </div>
+        <div class="estado-badge" [class]="'estado-' + getEstadoClase(tramite.estado)">
+          <span class="material-icons">{{ getEstadoIcon(tramite.estado) }}</span>
+          {{ getEstadoTexto(tramite.estado) }}
+        </div>
+      </div>
+      
+      <div class="card-body">
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="material-icons">person</span>
+            <span>Cliente: <strong>{{ tramite.clienteId }}</strong></span>
+          </div>
+          <div class="info-item">
+            <span class="material-icons">business</span>
+            <span>Departamento: <strong>{{ tramite.departamentoActual || 'No asignado' }}</strong></span>
+          </div>
+          <div class="info-item">
+            <span class="material-icons">event</span>
+            <span>Creado: {{ tramite.creadoEn | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+          <div class="info-item" *ngIf="tramite.actualizadoEn">
+            <span class="material-icons">update</span>
+            <span>Actualizado: {{ tramite.actualizadoEn | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+        </div>
+        
+        <!-- Tiempo en estado actual -->
+        <div class="tiempo-estado" *ngIf="tramite.actualizadoEn">
+          <span class="material-icons">timer</span>
+          <span>Tiempo en estado: {{ calcularTiempoEnEstado(tramite.actualizadoEn) }}</span>
+        </div>
+      </div>
+      
+      <div class="card-footer">
+        <button class="btn-ver" (click)="verDetalle(tramite)">
+          <span class="material-icons">visibility</span>
+          Ver Detalle
+        </button>
+        <button class="btn-procesar" (click)="abrirModal(tramite)" 
+                [disabled]="tramite.estado === 'COMPLETADO' || tramite.estado === 'RECHAZADO'">
+          <span class="material-icons">play_arrow</span>
+          Procesar
+        </button>
+      </div>
+    </div>
+    
+    <div *ngIf="tramitesFiltrados.length === 0" class="sin-tramites">
+      <span class="material-icons">inbox</span>
+      <p>No hay trámites para procesar en este momento</p>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Detalle -->
+<div class="modal-overlay" *ngIf="mostrarModalDetalle" (click)="cerrarModalDetalle()">
+  <div class="modal modal-large" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3><span class="material-icons">info</span>Detalle del Trámite</h3>
+      <button class="btn-close" (click)="cerrarModalDetalle()"><span class="material-icons">close</span></button>
+    </div>
+    <div class="modal-body" *ngIf="tramiteDetalle">
+      <div class="detalle-grid">
+        <div class="detalle-item"><strong>Código:</strong> {{ tramiteDetalle.codigo }}</div>
+        <div class="detalle-item"><strong>Estado:</strong> <span class="estado-badge" [class]="'estado-' + getEstadoClase(tramiteDetalle.estado)">{{ getEstadoTexto(tramiteDetalle.estado) }}</span></div>
+        <div class="detalle-item"><strong>Departamento:</strong> {{ tramiteDetalle.departamentoActual || 'No asignado' }}</div>
+        <div class="detalle-item"><strong>Cliente ID:</strong> {{ tramiteDetalle.clienteId }}</div>
+        <div class="detalle-item"><strong>Fecha creación:</strong> {{ tramiteDetalle.creadoEn | date:'dd/MM/yyyy HH:mm' }}</div>
+        <div class="detalle-item"><strong>Última actualización:</strong> {{ tramiteDetalle.actualizadoEn | date:'dd/MM/yyyy HH:mm' }}</div>
+      </div>
+      
+      <div class="historial" *ngIf="tramiteDetalle.historial?.length > 0">
+        <h4>Historial de pasos</h4>
+        <div class="timeline">
+          <div class="timeline-item" *ngFor="let paso of tramiteDetalle.historial">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <div class="timeline-date">{{ paso.iniciadoEn | date:'dd/MM/yyyy HH:mm' }}</div>
+              <div class="timeline-title">{{ paso.nombreNodo || 'Paso' }}</div>
+              <div class="timeline-desc" *ngIf="paso.comentario">{{ paso.comentario }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="cerrarModalDetalle()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Procesamiento (existente) -->
+<div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3><span class="material-icons">play_circle</span>Procesar Trámite</h3>
+      <button class="btn-close" (click)="cerrarModal()"><span class="material-icons">close</span></button>
+    </div>
+    <div class="modal-body">
+      <div class="info-section">
+        <p><strong>Código:</strong> {{ tramiteSeleccionado?.codigo }}</p>
+        <p><strong>Cliente:</strong> {{ tramiteSeleccionado?.clienteId }}</p>
+        <p><strong>Estado actual:</strong> <span class="estado-actual">{{ getEstadoTexto(tramiteSeleccionado?.estado || '') }}</span></p>
+        <p><strong>Departamento actual:</strong> {{ tramiteSeleccionado?.departamentoActual || 'No asignado' }}</p>
+      </div>
+      
+      <div class="form-group">
+        <label><span class="material-icons">autorenew</span>Nuevo estado:</label>
+        <select [(ngModel)]="nuevoEstado" class="form-control">
+          <option value="EN_PROCESO">En Proceso</option>
+          <option value="PENDIENTE">Pendiente</option>
+          <option value="EN_MORA">En Mora</option>
+          <option value="COMPLETADO">Completado</option>
+          <option value="RECHAZADO">Rechazado</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label><span class="material-icons">business</span>Departamento destino:</label>
+        <select [(ngModel)]="departamentoDestino" class="form-control">
+          <option *ngFor="let depto of departamentos" [value]="depto.nombre">{{ depto.nombre }}</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label><span class="material-icons">edit_note</span>Observaciones:</label>
+        <textarea [(ngModel)]="observacion" rows="3" class="form-control" placeholder="Registre observaciones..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="cerrarModal()">Cancelar</button>
+      <button class="btn-confirmar" (click)="confirmarProcesar()" [disabled]="loading">Guardar</button>
+    </div>
+  </div>
+</div>

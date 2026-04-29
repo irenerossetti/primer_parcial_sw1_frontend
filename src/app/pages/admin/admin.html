@@ -1,0 +1,118 @@
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <h1>
+      <span class="material-icons">admin_panel_settings</span>
+      Panel de Administración
+    </h1>
+    <div class="user-info">
+      <span class="material-icons">account_circle</span>
+      <span>{{ getNombreUsuario() }}</span>
+      <button class="btn-logout" (click)="logout()">
+        <span class="material-icons">logout</span>
+        Salir
+      </button>
+    </div>
+  </div>
+
+  <!-- Resumen rápido -->
+  <div class="quick-stats">
+    <div class="stat-card">
+      <div class="stat-icon usuarios">
+        <span class="material-icons">people</span>
+      </div>
+      <div class="stat-info">
+        <h3>{{ usuarios.length }}</h3>
+        <p>Usuarios Totales</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon politicas">
+        <span class="material-icons">policy</span>
+      </div>
+      <div class="stat-info">
+        <h3>{{ politicas.length }}</h3>
+        <p>Políticas Activas</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon tramites">
+        <span class="material-icons">assignment</span>
+      </div>
+      <div class="stat-info">
+        <h3>{{ tramites.length }}</h3>
+        <p>Trámites Totales</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon proceso">
+        <span class="material-icons">hourglass_empty</span>
+      </div>
+      <div class="stat-info">
+        <h3>{{ tramitesEnProceso }}</h3>
+        <p>En Proceso</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Accesos rápidos -->
+  <div class="quick-access">
+    <h2>
+      <span class="material-icons">dashboard</span>
+      Accesos Rápidos
+    </h2>
+    
+    <div class="access-grid">
+      <a routerLink="/usuarios" class="access-card">
+        <span class="material-icons">people</span>
+        <h3>Gestión de Usuarios</h3>
+        <p>Crear, editar y administrar usuarios del sistema</p>
+      </a>
+
+      <a routerLink="/politicas" class="access-card">
+        <span class="material-icons">policy</span>
+        <h3>Políticas de Negocio</h3>
+        <p>Configurar flujos de trabajo y procesos</p>
+      </a>
+
+      <a routerLink="/dashboard" class="access-card">
+        <span class="material-icons">analytics</span>
+        <h3>Dashboard</h3>
+        <p>Ver estadísticas y análisis del sistema</p>
+      </a>
+
+      <a routerLink="/departamentos" class="access-card">
+        <span class="material-icons">business</span>
+        <h3>Departamentos</h3>
+        <p>Administrar departamentos y áreas</p>
+      </a>
+    </div>
+  </div>
+
+  <!-- Actividad reciente -->
+  <div class="recent-activity">
+    <h2>
+      <span class="material-icons">history</span>
+      Actividad Reciente
+    </h2>
+    
+    <div class="activity-list">
+      <div class="activity-item" *ngFor="let tramite of tramitesRecientes">
+        <div class="activity-icon">
+          <span class="material-icons">assignment</span>
+        </div>
+        <div class="activity-info">
+          <h4>{{ tramite.codigo }}</h4>
+          <p>{{ tramite.clienteNombre || tramite.clienteEmail }}</p>
+          <span class="activity-time">{{ calcularTiempoTranscurrido(tramite.creadoEn) }}</span>
+        </div>
+        <div class="activity-status" [class]="getEstadoClass(tramite.estado)">
+          {{ tramite.estado }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

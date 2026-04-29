@@ -1,0 +1,49 @@
+<div class="login-container">
+  <div class="login-card">
+
+    <!-- Logo / Título -->
+    <div class="login-header">
+      <div class="logo">⚙️</div>
+      <h1>WorkFlow</h1>
+      <p>Sistema de Gestión de Políticas de Negocio</p>
+    </div>
+
+    <!-- Formulario -->
+    <div class="login-form">
+
+      <div class="form-group">
+        <label>Correo electrónico</label>
+        <input 
+          type="email" 
+          [(ngModel)]="email" 
+          placeholder="ejemplo@correo.com"
+          (keyup.enter)="login()"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input 
+          type="password" 
+          [(ngModel)]="password" 
+          placeholder="••••••••"
+          (keyup.enter)="login()"
+        />
+      </div>
+
+      <!-- Error -->
+      <div class="error-msg" *ngIf="error">
+        ⚠️ {{ error }}
+      </div>
+
+      <!-- Botón -->
+      <button 
+        class="btn-login" 
+        (click)="login()" 
+        [disabled]="cargando">
+        {{ cargando ? 'Ingresando...' : 'Ingresar' }}
+      </button>
+
+    </div>
+  </div>
+</div>

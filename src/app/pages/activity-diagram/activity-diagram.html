@@ -1,0 +1,48 @@
+<div class="diagram-page">
+  <header class="diagram-header">
+    <div class="header-left">
+      <button (click)="volverAPoliticas()" class="btn-back">
+        <span class="material-icons">arrow_back</span>
+        Volver a Políticas
+      </button>
+      <h1>{{ politicaNombre || 'Diagrama de Actividades UML' }}</h1>
+    </div>
+    <div class="toolbar">
+      <button (click)="addLane()" class="btn-lane">
+        <span class="material-icons">add</span>
+        Agregar Calle
+      </button>
+      <button (click)="save()" class="btn-save">
+        <span class="material-icons">save</span>
+        Guardar
+      </button>
+      <button (click)="load()" class="btn-load">
+        <span class="material-icons">refresh</span>
+        Recargar
+      </button>
+      <div class="voice-indicator" *ngIf="voiceEnabled">
+        <span class="material-icons">mic</span>
+        <span class="voice-text">Asistente de Voz Activo</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="diagram-container">
+    <div class="palette-panel">
+      <h3>Paleta de Elementos</h3>
+      <div #paletteDiv class="palette-div"></div>
+    </div>
+
+    <div class="main-panel">
+      <div #diagramDiv class="diagram-div"></div>
+    </div>
+  </div>
+
+  <div class="model-panel">
+    <h3>Modelo JSON (solo lectura)</h3>
+    <textarea #savedModel class="model-textarea" readonly></textarea>
+  </div>
+
+  <!-- Voice Assistant -->
+  <app-voice-assistant (commandExecuted)="handleVoiceCommand($event)"></app-voice-assistant>
+</div>

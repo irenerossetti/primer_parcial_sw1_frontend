@@ -1,0 +1,99 @@
+<div class="tramites-container">
+  <div class="header">
+    <h1>Gestión de Trámites</h1>
+  </div>
+
+  <div class="filtros">
+    <label>Filtrar por estado:</label>
+    <select [(ngModel)]="filtroEstado" (change)="aplicarFiltro()">
+      <option value="todos">Todos</option>
+      <option value="NUEVO">Nuevos</option>
+      <option value="EN_PROCESO">En Proceso</option>
+      <option value="COMPLETADO">Completados</option>
+    </select>
+  </div>
+
+  <div class="stats">
+    <div class="stat total">Total: {{ tramites.length }}</div>
+    <div class="stat nuevo">Nuevos: {{ contarPorEstado('NUEVO') }}</div>
+    <div class="stat proceso">En Proceso: {{ contarPorEstado('EN_PROCESO') }}</div>
+    <div class="stat completado">Completados: {{ contarPorEstado('COMPLETADO') }}</div>
+  </div>
+
+  <div class="tramites-grid">
+    <div *ngFor="let tramite of tramitesFiltrados" class="tramite-card" [class]="getColorClass(tramite)">
+      <div class="card-header">
+        <div class="codigo">
+          <span class="material-icons">description</span>
+          {{ tramite.codigo }}
+        </div>
+        <div class="estado-badge" [class]="getEstadoClass(tramite.estado)">
+          {{ tramite.estado }}
+        </div>
+      </div>
+
+      <div class="card-body">
+        <div class="info-row">
+          <span class="material-icons">person</span>
+          <span><strong>Cliente ID:</strong> {{ tramite.clienteId }}</span>
+        </div>
+        <div class="info-row">
+          <span class="material-icons">business</span>
+          <span><strong>Departamento:</strong> {{ tramite.departamentoActual || 'No asignado' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="material-icons">event</span>
+          <span><strong>Creado:</strong> {{ tramite.creadoEn | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <button class="btn-detalle" (click)="verDetalle(tramite)">
+          <span class="material-icons">visibility</span> Ver Detalle
+        </button>
+        <button class="btn-eliminar" (click)="eliminarTramite(tramite)" *ngIf="authService.getRol() === 'ADMIN'">
+          <span class="material-icons">delete</span> Eliminar
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="tramitesFiltrados.length === 0" class="sin-tramites">
+      <span class="material-icons">inbox</span>
+      No hay trámites para mostrar
+    </div>
+  </div>
+</div>
+
+<!-- Modal de detalle -->
+<div class="modal" *ngIf="mostrarModal" (click)="cerrarModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Detalle del Trámite</h3>
+      <button class="btn-close" (click)="cerrarModal()">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+    <div class="modal-body" *ngIf="tramiteSeleccionado">
+      <p><strong>Código:</strong> {{ tramiteSeleccionado.codigo }}</p>
+      <p><strong>Estado:</strong> {{ tramiteSeleccionado.estado }}</p>
+      <p><strong>Departamento:</strong> {{ tramiteSeleccionado.departamentoActual || 'No asignado' }}</p>
+      <p><strong>Cliente ID:</strong> {{ tramiteSeleccionado.clienteId }}</p>
+      <p><strong>Fecha creación:</strong> {{ tramiteSeleccionado.creadoEn | date:'dd/MM/yyyy HH:mm' }}</p>
+      <p><strong>Última actualización:</strong> {{ tramiteSeleccionado.actualizadoEn | date:'dd/MM/yyyy HH:mm' }}</p>
+      <p><strong>Tiempo en estado:</strong> {{ calcularTiempo(tramiteSeleccionado.actualizadoEn) }}</p>
+      
+      <hr />
+      <h4>Historial de pasos</h4>
+      <div *ngFor="let paso of tramiteSeleccionado.historial" class="historial-item">
+        <span class="material-icons">check_circle</span>
+        <span>{{ paso.nombreNodo || paso.nodoId }} - {{ paso.iniciadoEn | date:'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+      <div *ngIf="!tramiteSeleccionado.historial || tramiteSeleccionado.historial.length === 0" class="sin-historial">
+        No hay historial disponible
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cerrar" (click)="cerrarModal()">Cerrar</button>
+    </div>
+  </div>
+</div>

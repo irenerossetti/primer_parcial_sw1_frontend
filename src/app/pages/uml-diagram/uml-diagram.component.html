@@ -1,0 +1,104 @@
+<div class="uml-diagram-page">
+  <header class="diagram-header">
+    <div class="header-left">
+      <button (click)="volver()" class="btn-back">
+        <span class="material-icons">arrow_back</span>
+        Volver
+      </button>
+      <div class="header-info">
+        <h1>{{ politica?.nombre || 'Diagrama UML 2.5' }}</h1>
+        <span class="badge-uml">UML 2.5 Activity Diagram</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button (click)="agregarSwimlane()" class="btn-action">
+        <span class="material-icons">view_week</span>
+        Agregar Swimlane
+      </button>
+      <button (click)="validarDiagrama()" class="btn-action">
+        <span class="material-icons">check_circle</span>
+        Validar
+      </button>
+      <button (click)="guardar()" class="btn-primary">
+        <span class="material-icons">save</span>
+        Guardar
+      </button>
+    </div>
+  </header>
+
+  <div class="diagram-content">
+    <app-uml-palette 
+      (nodoSeleccionado)="onNodoSeleccionado($event)"
+      (ayudaSolicitada)="mostrarAyudaUML()">
+    </app-uml-palette>
+
+    <div class="diagram-canvas">
+      <div #diagramDiv class="diagram-container"></div>
+      
+      <div class="diagram-toolbar">
+        <button (click)="zoomIn()" title="Acercar">
+          <span class="material-icons">zoom_in</span>
+        </button>
+        <button (click)="zoomOut()" title="Alejar">
+          <span class="material-icons">zoom_out</span>
+        </button>
+        <button (click)="zoomFit()" title="Ajustar">
+          <span class="material-icons">fit_screen</span>
+        </button>
+        <div class="toolbar-divider"></div>
+        <button (click)="deshacer()" [disabled]="!puedeDeshacer" title="Deshacer">
+          <span class="material-icons">undo</span>
+        </button>
+        <button (click)="rehacer()" [disabled]="!puedeRehacer" title="Rehacer">
+          <span class="material-icons">redo</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="properties-panel" *ngIf="nodoSeleccionado">
+      <div class="panel-header">
+        <h3>Propiedades</h3>
+        <button (click)="cerrarPropiedades()" class="btn-close">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+      <div class="panel-content">
+        <div class="form-group">
+          <label>Nombre</label>
+          <input type="text" [(ngModel)]="nodoSeleccionado.nombre" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Descripción</label>
+          <textarea [(ngModel)]="nodoSeleccionado.descripcion" class="form-control" rows="3"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" *ngIf="mostrandoAyuda" (click)="cerrarAyuda()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Guía UML 2.5</h2>
+        <button (click)="cerrarAyuda()" class="btn-close">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <h3>Elementos Básicos</h3>
+        <p>Usa la paleta lateral para agregar elementos al diagrama.</p>
+        
+        <h3>Swimlanes (Carriles)</h3>
+        <p>Los swimlanes organizan las actividades por departamento o responsable. Haz clic en "Agregar Swimlane" para crear uno nuevo.</p>
+        
+        <h3>Nodos de Control</h3>
+        <p>• <strong>Inicio:</strong> Punto de inicio del flujo (círculo verde)<br>
+           • <strong>Fin:</strong> Punto final del flujo (círculo rojo)<br>
+           • <strong>Decisión:</strong> Punto de decisión condicional (diamante amarillo)<br>
+           • <strong>Fork/Join:</strong> Ejecución paralela (barra negra)</p>
+        
+        <h3>Conexiones</h3>
+        <p>Arrastra desde un nodo a otro para crear conexiones. Puedes agregar etiquetas haciendo doble clic en la flecha.</p>
+      </div>
+    </div>
+  </div>
+</div>

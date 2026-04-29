@@ -1,0 +1,324 @@
+<div class="departamentos-container">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-title">
+      <span class="material-icons">business</span>
+      <h1>Departamentos</h1>
+    </div>
+    <div class="header-actions">
+      <button class="btn-refresh" (click)="cargarDepartamentos()" [disabled]="loading">
+        <span class="material-icons">refresh</span>
+      </button>
+      <button class="btn-primary" (click)="abrirModalNuevo()">
+        <span class="material-icons">add</span>
+        Nuevo Departamento
+      </button>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filtros-bar">
+    <div class="search-box">
+      <span class="material-icons">search</span>
+      <input 
+        type="text" 
+        [(ngModel)]="filtroBusqueda" 
+        (input)="aplicarFiltros()"
+        placeholder="Buscar por nombre, responsable o código..."
+        class="search-input"
+      >
+    </div>
+    
+    <div class="filter-group">
+      <label>Estado:</label>
+      <select [(ngModel)]="filtroEstado" (change)="aplicarFiltros()" class="filter-select">
+        <option value="todos">Todos</option>
+        <option value="ACTIVO">Activos</option>
+        <option value="INACTIVO">Inactivos</option>
+        <option value="MANTENIMIENTO">Mantenimiento</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon total">
+        <span class="material-icons">business</span>
+      </div>
+      <div class="stat-info">
+        <h3>Total</h3>
+        <p>{{ departamentos.length }}</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon activos">
+        <span class="material-icons">check_circle</span>
+      </div>
+      <div class="stat-info">
+        <h3>Activos</h3>
+        <p>{{ departamentos.filter(d => d.estado === 'ACTIVO').length }}</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon inactivos">
+        <span class="material-icons">cancel</span>
+      </div>
+      <div class="stat-info">
+        <h3>Inactivos</h3>
+        <p>{{ departamentos.filter(d => d.estado === 'INACTIVO').length }}</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon mantenimiento">
+        <span class="material-icons">construction</span>
+      </div>
+      <div class="stat-info">
+        <h3>Mantenimiento</h3>
+        <p>{{ departamentos.filter(d => d.estado === 'MANTENIMIENTO').length }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    <p>Cargando departamentos...</p>
+  </div>
+
+  <!-- Lista de departamentos -->
+  <div *ngIf="!loading" class="departamentos-grid">
+    <div *ngFor="let depto of departamentosFiltrados" class="depto-card" [class]="getEstadoClass(depto.estado)">
+      <div class="card-header">
+        <div class="depto-icon">
+          <span class="material-icons">{{ getTipoIcon(depto.tipo) }}</span>
+        </div>
+        <div class="depto-info">
+          <h3>{{ depto.nombre }}</h3>
+          <span class="depto-codigo">{{ depto.codigo }}</span>
+        </div>
+        <div class="estado-badge" [class]="getEstadoClass(depto.estado)">
+          <span class="material-icons">{{ getEstadoIcon(depto.estado) }}</span>
+          {{ getEstadoLabel(depto.estado) }}
+        </div>
+      </div>
+      
+      <div class="card-body">
+        <div class="info-row">
+          <span class="material-icons">description</span>
+          <span class="label">Descripción:</span>
+          <span class="value">{{ depto.descripcion || 'Sin descripción' }}</span>
+        </div>
+        
+        <div class="info-row">
+          <span class="material-icons">category</span>
+          <span class="label">Tipo:</span>
+          <span class="value">{{ getTipoLabel(depto.tipo) }}</span>
+        </div>
+        
+        <div class="info-row">
+          <span class="material-icons">person</span>
+          <span class="label">Responsable:</span>
+          <span class="value">{{ depto.responsableNombre }}</span>
+        </div>
+        
+        <div class="info-row">
+          <span class="material-icons">email</span>
+          <span class="label">Email:</span>
+          <span class="value">{{ depto.responsableEmail }}</span>
+        </div>
+        
+        <div class="info-row metricas">
+          <span class="material-icons">assessment</span>
+          <span class="label">Métricas:</span>
+          <div class="metricas-badges">
+            <span class="metric-badge">
+              <span class="material-icons">assignment_turned_in</span>
+              {{ depto.metricas?.tramitesAtendidos || 0 }}
+            </span>
+            <span class="metric-badge pendiente">
+              <span class="material-icons">hourglass_empty</span>
+              {{ depto.metricas?.tramitesPendientes || 0 }}
+            </span>
+            <span class="metric-badge mora">
+              <span class="material-icons">warning</span>
+              {{ depto.metricas?.tramitesEnMora || 0 }}
+            </span>
+          </div>
+        </div>
+        
+        <div class="info-row" *ngIf="depto.metricas?.eficiencia">
+          <span class="material-icons">speed</span>
+          <span class="label">Eficiencia:</span>
+          <div class="eficiencia-bar">
+            <div class="eficiencia-progress" [style.width.%]="depto.metricas.eficiencia" 
+                 [style.backgroundColor]="getEficienciaColor(depto.metricas.eficiencia)"></div>
+            <span class="eficiencia-text">{{ depto.metricas.eficiencia }}%</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card-footer">
+        <button class="btn-editar" (click)="abrirModalEditar(depto)">
+          <span class="material-icons">edit</span>
+          Editar
+        </button>
+        <button class="btn-eliminar" (click)="confirmarEliminar(depto)">
+          <span class="material-icons">delete</span>
+          Eliminar
+        </button>
+      </div>
+    </div>
+    
+    <div *ngIf="departamentosFiltrados.length === 0" class="sin-resultados">
+      <span class="material-icons">inbox</span>
+      <p>No se encontraron departamentos</p>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Crear/Editar -->
+<div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
+  <div class="modal modal-large" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>
+        <span class="material-icons">{{ esEdicion ? 'edit' : 'add' }}</span>
+        {{ modalTitulo }}
+      </h3>
+      <button class="btn-close" (click)="cerrarModal()">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>
+            <span class="material-icons">business</span>
+            Nombre del Departamento *
+          </label>
+          <input type="text" [(ngModel)]="departamentoSeleccionado.nombre" class="form-control" placeholder="Ej: Atención al Cliente">
+        </div>
+        
+        <div class="form-group">
+          <label>
+            <span class="material-icons">category</span>
+            Tipo de Departamento *
+          </label>
+          <select [(ngModel)]="departamentoSeleccionado.tipo" class="form-control">
+            <option *ngFor="let tipo of tiposDepartamento" [value]="tipo.value">
+              {{ tipo.label }}
+            </option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label>
+          <span class="material-icons">description</span>
+          Descripción
+        </label>
+        <textarea [(ngModel)]="departamentoSeleccionado.descripcion" rows="2" class="form-control" 
+                  placeholder="Describa las funciones y responsabilidades del departamento..."></textarea>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label>
+            <span class="material-icons">person</span>
+            Responsable *
+          </label>
+          <input type="text" [(ngModel)]="departamentoSeleccionado.responsableNombre" class="form-control" placeholder="Nombre completo">
+        </div>
+        
+        <div class="form-group">
+          <label>
+            <span class="material-icons">email</span>
+            Email del Responsable *
+          </label>
+          <input type="email" [(ngModel)]="departamentoSeleccionado.responsableEmail" class="form-control" placeholder="email@ejemplo.com">
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label>
+            <span class="material-icons">toggle_on</span>
+            Estado
+          </label>
+          <select [(ngModel)]="departamentoSeleccionado.estado" class="form-control">
+            <option *ngFor="let estado of estadosDisponibles" [value]="estado.value">
+              {{ estado.label }}
+            </option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>
+            <span class="material-icons">schedule</span>
+            Tiempo máximo (horas)
+          </label>
+          <input type="number" [(ngModel)]="departamentoSeleccionado.configuracionFlujo.tiempoMaximoHoras" class="form-control">
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label>
+          <span class="material-icons">swap_horiz</span>
+          Departamento destino (flujo)
+        </label>
+        <select [(ngModel)]="departamentoSeleccionado.configuracionFlujo.departamentosSiguientes[0]" class="form-control">
+          <option value="">Ninguno (es el último)</option>
+          <option *ngFor="let depto of departamentos" [value]="depto.nombre">
+            {{ depto.nombre }}
+          </option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="cerrarModal()">
+        <span class="material-icons">cancel</span>
+        Cancelar
+      </button>
+      <button class="btn-guardar" (click)="guardarDepartamento()" [disabled]="loading">
+        <span class="material-icons" *ngIf="!loading">save</span>
+        <span class="spinner-small" *ngIf="loading"></span>
+        {{ esEdicion ? 'Actualizar' : 'Crear' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Confirmación Eliminar -->
+<div class="modal-overlay" *ngIf="mostrarModalEliminar" (click)="cerrarModalEliminar()">
+  <div class="modal modal-small" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>
+        <span class="material-icons">warning</span>
+        Confirmar Eliminación
+      </h3>
+      <button class="btn-close" (click)="cerrarModalEliminar()">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+    
+    <div class="modal-body">
+      <p>¿Está seguro que desea eliminar el departamento?</p>
+      <p class="warning-text">
+        <strong>{{ departamentoAEliminar?.nombre }}</strong>
+      </p>
+      <p class="warning-message">Esta acción no se puede deshacer.</p>
+    </div>
+    
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="cerrarModalEliminar()">
+        Cancelar
+      </button>
+      <button class="btn-eliminar-confirm" (click)="eliminarDepartamento()" [disabled]="loading">
+        <span class="material-icons">delete</span>
+        Eliminar
+      </button>
+    </div>
+  </div>
+</div>

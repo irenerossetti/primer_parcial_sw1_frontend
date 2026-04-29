@@ -1,0 +1,93 @@
+<div class="cuellos-botella-container">
+  <div class="header">
+    <h1>Monitor de Cuellos de Botella</h1>
+    <button (click)="cargarDatos()" class="btn-refresh">Actualizar</button>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    <p>Cargando datos...</p>
+  </div>
+
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+  </div>
+
+  <div *ngIf="cuellosData && !loading" class="content">
+    <!-- Resumen General -->
+    <div class="resumen-general">
+      <div class="stat-card">
+        <h3>Total Trámites en Espera</h3>
+        <p class="numero-grande">{{ cuellosData.totalTramitesEnEspera }}</p>
+      </div>
+      <div class="stat-card" *ngIf="cuellosData.departamentoCritico">
+        <h3>Departamento Crítico</h3>
+        <p class="numero-grande critico">{{ cuellosData.departamentoCritico }}</p>
+      </div>
+    </div>
+
+    <!-- Análisis por Departamento -->
+    <section class="departamentos">
+      <h2>Estado por Departamento</h2>
+      <div class="departamentos-grid">
+        <div 
+          *ngFor="let depto of cuellosData.departamentos" 
+          class="depto-card"
+          [ngClass]="getEstadoClass(depto.estado)">
+          
+          <div class="depto-header">
+            <span class="icono">{{ getEstadoIcon(depto.estado) }}</span>
+            <h3>{{ depto.nombre }}</h3>
+            <span class="estado-badge">{{ depto.estado }}</span>
+          </div>
+
+          <div class="depto-stats">
+            <div class="stat">
+              <span class="label">Trámites en Espera</span>
+              <span class="valor">{{ depto.tramitesEnEspera }}</span>
+            </div>
+            <div class="stat">
+              <span class="label">Tiempo Promedio</span>
+              <span class="valor">{{ depto.tiempoPromedioHoras | number: '1.1-1' }}h</span>
+            </div>
+            <div class="stat">
+              <span class="label">Capacidad Utilizada</span>
+              <span class="valor">{{ depto.capacidadUtilizada }}%</span>
+            </div>
+          </div>
+
+          <!-- Barra de progreso -->
+          <div class="progress-bar">
+            <div class="progress" [style.width.%]="depto.capacidadUtilizada"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Trámites Atrasados -->
+    <section class="tramites-atrasados" *ngIf="cuellosData.tramitesAtrasados.length > 0">
+      <h2>Trámites Atrasados (Mayor de 3 días)</h2>
+      <table class="tramites-table">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Cliente</th>
+            <th>Días Atrasado</th>
+            <th>Departamento</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let tramite of cuellosData.tramitesAtrasados">
+            <td>{{ tramite.codigo }}</td>
+            <td>{{ tramite.cliente }}</td>
+            <td class="dias-atrasado">{{ tramite.demoraDias }} días</td>
+            <td>{{ tramite.departamentoActual }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <div *ngIf="cuellosData.tramitesAtrasados.length === 0" class="no-atrasados">
+      <p>✅ No hay trámites atrasados</p>
+    </div>
+  </div>
+</div>

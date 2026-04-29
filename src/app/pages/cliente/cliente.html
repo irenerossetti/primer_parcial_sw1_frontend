@@ -1,0 +1,201 @@
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <h1>
+      <span class="material-icons">assignment</span>
+      Mis Trámites
+    </h1>
+    <div class="header-actions">
+      <button class="btn-nuevo" (click)="abrirModalCrear()">
+        <span class="material-icons">add</span>
+        Nuevo Trámite
+      </button>
+      <button class="btn-salir" (click)="logout()">
+        <span class="material-icons">logout</span>
+        Salir
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats compactas -->
+  <div class="stats-bar">
+    <div class="stat-item">
+      <span class="stat-label">Total:</span>
+      <span class="stat-value">{{ tramites.length }}</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">Pendientes:</span>
+      <span class="stat-value pendiente">{{ tramites.length - tramitesCompletados }}</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">Completados:</span>
+      <span class="stat-value completado">{{ tramitesCompletados }}</span>
+    </div>
+  </div>
+
+  <!-- Tabla de trámites -->
+  <div class="tramites-table-container">
+    <table class="tramites-table" *ngIf="tramites.length > 0">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Departamento</th>
+          <th>Fecha Creación</th>
+          <th>Estado</th>
+          <th>Avance</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let tramite of tramites" [class.completado]="tramite.estado === 'COMPLETADO'" [class.en-proceso]="tramite.estado === 'EN_PROCESO'">
+          <td>
+            <a href="javascript:void(0)" class="tramite-link" (click)="verDetalle(tramite)">
+              {{ tramite.codigo }}
+            </a>
+          </td>
+          <td>{{ getDepartamentoActual(tramite) }}</td>
+          <td>{{ tramite.creadoEn | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td>
+            <span class="badge" [class.badge-completado]="tramite.estado === 'COMPLETADO'" 
+                  [class.badge-proceso]="tramite.estado === 'EN_PROCESO'"
+                  [class.badge-nuevo]="tramite.estado === 'NUEVO'">
+              {{ tramite.estado }}
+            </span>
+          </td>
+          <td>
+            <div class="progress-bar">
+              <div class="progress-fill" [style.width.%]="getPorcentajeAvance(tramite)"></div>
+              <span class="progress-text">{{ getPorcentajeAvance(tramite) }}%</span>
+            </div>
+          </td>
+          <td>
+            <div class="acciones">
+              <button class="btn-icon" (click)="verDetalle(tramite)" title="Ver detalle">
+                <span class="material-icons">visibility</span>
+              </button>
+              <button class="btn-icon btn-pdf" (click)="descargarPDF(tramite)" title="Descargar PDF">
+                <span class="material-icons">picture_as_pdf</span>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="tramites.length === 0" class="sin-tramites">
+      <span class="material-icons">inbox</span>
+      <p>No tienes trámites registrados</p>
+      <button class="btn-crear-primero" (click)="abrirModalCrear()">Crear mi primer trámite</button>
+    </div>
+  </div>
+
+  <!-- Modal para crear trámite -->
+  <div class="modal" *ngIf="mostrarModalCrear">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Nuevo Trámite</h3>
+        <button class="btn-close" (click)="cerrarModalCrear()">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Política de negocio <span class="requerido">*</span></label>
+          <select [(ngModel)]="nuevoTramite.politicaId" (change)="onPoliticaChange(nuevoTramite.politicaId)" class="form-control" [disabled]="politicas.length === 0">
+            <option value="" disabled>Seleccione una política</option>
+            <option *ngFor="let politica of politicas" [value]="politica.id">
+              {{ politica.nombre }}
+            </option>
+          </select>
+          <small *ngIf="politicas.length === 0" class="error">No hay políticas activas disponibles para crear trámites.</small>
+        </div>
+
+        <div class="form-group">
+          <label>Tipo de Trámite</label>
+          <select [(ngModel)]="nuevoTramite.tipo" class="form-control">
+            <option value="LUZ">Solicitud de Luz</option>
+            <option value="AGUA">Solicitud de Agua</option>
+            <option value="DOCUMENTOS">Trámite de Documentos</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Descripción</label>
+          <textarea [(ngModel)]="nuevoTramite.descripcion" rows="3" placeholder="Describa su solicitud..." class="form-control"></textarea>
+        </div>
+
+        <!-- Campos Dinámicos -->
+        <div *ngIf="cargandoCampos" class="cargando-campos">
+          <span class="material-icons spinner">refresh</span>
+          <p>Cargando campos del formulario...</p>
+        </div>
+
+        <div *ngIf="!cargandoCampos && camposDinamicos.length > 0" class="campos-dinamicos">
+          <h4>Información Requerida</h4>
+          <div *ngFor="let campo of camposDinamicos" class="form-group" [class.con-error]="tieneError(campo.nombre)">
+            <label>
+              {{ campo.etiqueta }}
+              <span class="requerido" *ngIf="campo.requerido">*</span>
+            </label>
+
+            <input *ngIf="campo.tipo === 'TEXT'" type="text" [(ngModel)]="datosFormulario[campo.nombre]" placeholder="{{ campo.ayuda || '' }}" class="form-control">
+            <input *ngIf="campo.tipo === 'EMAIL'" type="email" [(ngModel)]="datosFormulario[campo.nombre]" placeholder="ejemplo@correo.com" class="form-control">
+            <input *ngIf="campo.tipo === 'PHONE'" type="tel" [(ngModel)]="datosFormulario[campo.nombre]" placeholder="+57 123 456 7890" class="form-control">
+            <input *ngIf="campo.tipo === 'DATE'" type="date" [(ngModel)]="datosFormulario[campo.nombre]" class="form-control">
+            <input *ngIf="campo.tipo === 'NUMBER'" type="number" [(ngModel)]="datosFormulario[campo.nombre]" placeholder="0" class="form-control">
+            <textarea *ngIf="campo.tipo === 'TEXTAREA'" [(ngModel)]="datosFormulario[campo.nombre]" rows="3" placeholder="{{ campo.ayuda || '' }}" class="form-control"></textarea>
+            
+            <select *ngIf="campo.tipo === 'SELECT'" [(ngModel)]="datosFormulario[campo.nombre]" class="form-control">
+              <option value="" disabled>Seleccione una opción</option>
+              <option *ngFor="let opt of campo.opciones" [value]="opt.valor">{{ opt.etiqueta }}</option>
+            </select>
+
+            <div *ngIf="campo.tipo === 'RADIO'" class="radio-group">
+              <div *ngFor="let opt of campo.opciones" class="radio-item">
+                <input type="radio" [id]="campo.nombre + '_' + opt.valor" [value]="opt.valor" [(ngModel)]="datosFormulario[campo.nombre]" name="{{ campo.nombre }}">
+                <label [for]="campo.nombre + '_' + opt.valor">{{ opt.etiqueta }}</label>
+              </div>
+            </div>
+
+            <div *ngIf="campo.tipo === 'CHECKBOX'" class="checkbox-item">
+              <input type="checkbox" [id]="campo.nombre" [(ngModel)]="datosFormulario[campo.nombre]">
+              <label [for]="campo.nombre">{{ campo.etiqueta }}</label>
+            </div>
+
+            <small *ngIf="tieneError(campo.nombre)" class="error">
+              <span class="material-icons">error</span> {{ obtenerError(campo.nombre) }}
+            </small>
+            <small *ngIf="campo.ayuda && !tieneError(campo.nombre)" class="help-text">{{ campo.ayuda }}</small>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn-cancelar" (click)="cerrarModalCrear()">Cancelar</button>
+        <button class="btn-crear-tramite" (click)="crearTramite()" [disabled]="politicas.length === 0 || cargandoCampos">
+          <span class="material-icons">check</span> Crear Trámite
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para ver detalle del trámite -->
+  <div class="modal-overlay" *ngIf="mostrarModalDetalle" (click)="cerrarModalDetalle()">
+    <div class="modal-detalle" (click)="$event.stopPropagation()" *ngIf="tramiteSeleccionado">
+      <div class="modal-detalle-header">
+        <h2>{{ tramiteSeleccionado.codigo }}</h2>
+        <button class="btn-close" (click)="cerrarModalDetalle()">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+      <div class="modal-detalle-body">
+        <app-tramite-recorrido [tramite]="tramiteSeleccionado" #recorridoRef></app-tramite-recorrido>
+      </div>
+      <div class="modal-detalle-footer">
+        <button class="btn-descargar" (click)="descargarPDF(tramiteSeleccionado)">
+          <span class="material-icons">description</span> Descargar PDF
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

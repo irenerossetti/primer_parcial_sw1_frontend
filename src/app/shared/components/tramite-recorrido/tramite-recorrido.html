@@ -1,0 +1,101 @@
+<div class="recorrido-container" id="recorrido-container">
+  <!-- Encabezado del recorrido -->
+  <div class="recorrido-header">
+    <h2>Recorrido del Trámite</h2>
+    <div class="progreso-general">
+      <div class="progreso-bar" [class.en-mora]="tramite.estado === 'EN_MORA'">
+        <div class="progreso-relleno" [style.width.%]="getPorcentajeCompletados()"></div>
+      </div>
+      <span class="progreso-texto" [class.en-mora]="tramite.estado === 'EN_MORA'">
+        {{ getPorcentajeCompletados() }}% completado
+        <span *ngIf="tramite.estado === 'EN_MORA'" class="alerta-mora">
+          <span class="material-icons">warning</span> En Mora
+        </span>
+      </span>
+    </div>
+  </div>
+
+  <!-- Timeline visual del recorrido -->
+  <div class="timeline">
+    <div *ngFor="let paso of nodosUnicos; let last = last" class="timeline-item" [class]="getEstadoClass(paso.estado)">
+      <!-- Línea conectora vertical -->
+      <div class="timeline-line" *ngIf="!last"></div>
+      
+      <!-- Nodo del paso -->
+      <div class="timeline-node">
+        <span class="material-icons">{{ getIconoEstado(paso.estado) }}</span>
+      </div>
+      
+      <!-- Contenido del paso -->
+      <div class="timeline-content">
+        <div class="paso-header">
+          <h3>{{ paso.nombreNodo }}</h3>
+          <span class="paso-estado">{{ paso.estado }}</span>
+        </div>
+        
+        <div class="paso-detalles">
+          <div class="detalle-item">
+            <span class="material-icons">schedule</span>
+            <span class="detalle-label">Inicio:</span>
+            <span class="detalle-valor">{{ paso.iniciadoEn | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+
+          <div class="detalle-item" *ngIf="paso.completadoEn">
+            <span class="material-icons">check_circle</span>
+            <span class="detalle-label">Finalizado:</span>
+            <span class="detalle-valor">{{ paso.completadoEn | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+
+          <div class="detalle-item">
+            <span class="material-icons">hourglass_bottom</span>
+            <span class="detalle-label">Tiempo:</span>
+            <span class="detalle-valor">{{ getTiempoTranscurrido(paso) }}</span>
+          </div>
+
+          <div class="detalle-item" *ngIf="paso.departamentoId">
+            <span class="material-icons">business</span>
+            <span class="detalle-label">Departamento:</span>
+            <span class="detalle-valor">{{ paso.departamentoId }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Si no hay histórico -->
+    <div *ngIf="nodosUnicos.length === 0" class="sin-historial">
+      <span class="material-icons">info</span>
+      <p>El trámite aún no ha comenzado su recorrido</p>
+    </div>
+  </div>
+
+  <!-- Resumen del estado actual -->
+  <div class="resumen-actual" *ngIf="tramite">
+    <h3>Estado Actual</h3>
+    <div class="resumen-grid">
+      <div class="resumen-item">
+        <span class="label">Código:</span>
+        <span class="valor">{{ tramite.codigo }}</span>
+      </div>
+      <div class="resumen-item">
+        <span class="label">Estado General:</span>
+        <span class="valor estado-badge" [class]="tramite.estado">{{ tramite.estado }}</span>
+      </div>
+      <div class="resumen-item">
+        <span class="label">Nodo Actual:</span>
+        <span class="valor">{{ tramite.nodoActualId }}</span>
+      </div>
+      <div class="resumen-item">
+        <span class="label">Departamento:</span>
+        <span class="valor">{{ tramite.departamentoActual || 'No asignado' }}</span>
+      </div>
+      <div class="resumen-item">
+        <span class="label">Creado:</span>
+        <span class="valor">{{ tramite.creadoEn | date:'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+      <div class="resumen-item">
+        <span class="label">Última actualización:</span>
+        <span class="valor">{{ tramite.actualizadoEn | date:'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+    </div>
+  </div>
+</div>
