@@ -41,9 +41,9 @@ testem.log
 .DS_Store
 Thumbs.db
 
-# Environment files with API keys
-/src/environments/environment.ts
-/src/environments/environment.prod.ts
+# Environment files with API keys (Commited for easier deployment)
+# /src/environments/environment.ts
+# /src/environments/environment.prod.ts
 
 # Keep example file
 !/src/environments/environment.example.ts
