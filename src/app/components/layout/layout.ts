@@ -479,25 +479,35 @@ import { AIChatbotComponent } from '../ai-chatbot/ai-chatbot';
     }
 
     /* Responsive Media Queries */
-    @media (max-width: 768px) {
-      .sidebar {
-        position: fixed;
+    @media (max-width: 992px) {
+      /* Hacer que el sidebar sea fijo y flotante, y se oculte por defecto */
+      .app-container .sidebar {
+        position: fixed !important;
         left: 0;
         top: 0;
         bottom: 0;
-        width: 260px;
-        transform: translateX(-100%);
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        width: 260px !important;
+        transform: translateX(-100%) !important;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
         z-index: 200;
       }
       
-      .sidebar.collapsed {
-        transform: translateX(-100%);
-        width: 260px;
+      /* Mantener oculto si está colapsado */
+      .app-container .sidebar.collapsed {
+        transform: translateX(-100%) !important;
+        width: 260px !important;
       }
       
-      .sidebar:not(.collapsed) {
-        transform: translateX(0);
+      /* Mostrar si NO está colapsado */
+      .app-container .sidebar:not(.collapsed) {
+        transform: translateX(0) !important;
+      }
+      
+      /* El contenido principal debe ocupar todo el ancho */
+      .app-container .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+        flex: 1;
       }
       
       .top-header {
@@ -513,7 +523,7 @@ import { AIChatbotComponent } from '../ai-chatbot/ai-chatbot';
       }
       
       .user-avatar span:not(.rol-badge) {
-        display: none; /* Ocultar nombre del usuario en móvil */
+        display: none !important; /* Ocultar nombre del usuario en móvil */
       }
       
       .content-area {
