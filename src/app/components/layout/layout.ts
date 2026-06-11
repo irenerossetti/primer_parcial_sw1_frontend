@@ -477,6 +477,70 @@ import { AIChatbotComponent } from '../ai-chatbot/ai-chatbot';
     .notification-dropdown::-webkit-scrollbar-thumb:hover {
       background: rgba(255, 255, 255, 0.5);
     }
+
+    /* Responsive Media Queries */
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 260px;
+        transform: translateX(-100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 200;
+      }
+      
+      .sidebar.collapsed {
+        transform: translateX(-100%);
+        width: 260px;
+      }
+      
+      .sidebar:not(.collapsed) {
+        transform: translateX(0);
+      }
+      
+      .top-header {
+        padding: 12px 16px;
+      }
+      
+      .header-title h2 {
+        font-size: 1.1rem;
+      }
+      
+      .user-menu {
+        gap: 10px;
+      }
+      
+      .user-avatar span:not(.rol-badge) {
+        display: none; /* Ocultar nombre del usuario en móvil */
+      }
+      
+      .content-area {
+        padding: 16px;
+      }
+      
+      /* Overlay cuando el sidebar está abierto en móvil */
+      .app-container::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 150;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s;
+      }
+      
+      /* Si el sidebar no está colapsado (abierto en móvil) */
+      .app-container:has(.sidebar:not(.collapsed))::before {
+        opacity: 1;
+        pointer-events: auto;
+      }
+    }
   `]
 })
 export class LayoutComponent implements OnInit, OnDestroy {

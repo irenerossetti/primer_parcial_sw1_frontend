@@ -262,6 +262,50 @@ Chart.register(...registerables);
     .error-message .material-icons {
       font-size: 24px;
     }
+
+    /* Responsive Media Queries */
+    @media (max-width: 1024px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .rendimiento-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .dashboard {
+        padding: 12px;
+        height: auto;
+      }
+      .page-header h1 {
+        font-size: 1.5rem;
+      }
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+      .charts-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+      .rendimiento-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+      canvas {
+        max-height: 200px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      .stat-card {
+        padding: 12px;
+      }
+    }
   `]
 })
 export class DashboardComponent implements OnInit, AfterViewInit {
