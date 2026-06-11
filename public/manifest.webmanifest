@@ -1,0 +1,17 @@
+{
+  "name": "Diagramador de Políticas de Negocio",
+  "short_name": "Diagramador",
+  "theme_color": "#1e3a8a",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "assets/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
