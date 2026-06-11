@@ -1,3 +1,4 @@
+import { environment } from '../../../environments/environment';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -55,7 +56,7 @@ export interface Departamento {
   providedIn: 'root'
 })
 export class DepartamentoService {
-  private apiUrl = 'http://localhost:8080/api/departamentos';
+  private apiUrl = `${environment.apiUrl}/departamentos`;
 
   constructor(
     private http: HttpClient,

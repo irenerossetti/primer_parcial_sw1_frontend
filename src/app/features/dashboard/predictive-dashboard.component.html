@@ -1,0 +1,253 @@
+<div class="predictive-dashboard">
+  <!-- Header -->
+  <div class="dashboard-header">
+    <h1>📊 Dashboard Predictivo</h1>
+    <div class="header-actions">
+      <button class="btn-refresh" (click)="refresh()" [disabled]="loading">
+        🔄 Actualizar
+      </button>
+      <button 
+        class="btn-auto-refresh" 
+        (click)="toggleAutoRefresh()"
+        [class.active]="autoRefresh">
+        {{ autoRefresh ? '⏸' : '▶' }} Auto-refresh
+      </button>
+      <span class="last-update" *ngIf="lastUpdate">
+        Última actualización: {{ lastUpdate | date:'short' }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Cargando dashboard...</p>
+  </div>
+
+  <!-- Error State -->
+  <div class="error" *ngIf="error && !loading">
+    <p>❌ {{ error }}</p>
+    <button (click)="loadDashboard()">Reintentar</button>
+  </div>
+
+  <!-- Dashboard Content -->
+  <div class="dashboard-content" *ngIf="!loading && !error">
+    
+    <!-- Métricas Principales -->
+    <section class="metrics-overview">
+      <div class="metric-card" *ngIf="overview">
+        <div class="metric-icon">📋</div>
+        <div class="metric-data">
+          <h3>{{ formatNumber(overview.total_tramites) }}</h3>
+          <p>Trámites Totales</p>
+          <span [class]="getChangeClass(overview.cambio_tramites_porcentaje)">
+            {{ getChangeIcon(overview.cambio_tramites_porcentaje) }} 
+            {{ Math.abs(overview.cambio_tramites_porcentaje) }}%
+          </span>
+        </div>
+      </div>
+
+      <div class="metric-card" *ngIf="overview">
+        <div class="metric-icon success">✓</div>
+        <div class="metric-data">
+          <h3>{{ formatNumber(overview.total_completados) }}</h3>
+          <p>Completados</p>
+          <span [class]="getChangeClass(overview.cambio_completados_porcentaje)">
+            {{ getChangeIcon(overview.cambio_completados_porcentaje) }} 
+            {{ Math.abs(overview.cambio_completados_porcentaje) }}%
+          </span>
+        </div>
+      </div>
+
+      <div class="metric-card" *ngIf="overview">
+        <div class="metric-icon warning">⏱</div>
+        <div class="metric-data">
+          <h3>{{ overview.tiempo_promedio_dias }} días</h3>
+          <p>Tiempo Promedio</p>
+          <span class="neutral">Procesamiento</span>
+        </div>
+      </div>
+
+      <div class="metric-card" *ngIf="overview">
+        <div class="metric-icon info">★</div>
+        <div class="metric-data">
+          <h3>{{ overview.satisfaccion_promedio }}</h3>
+          <p>Satisfacción</p>
+          <span class="positive">de 5.0</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Alertas -->
+    <section class="alerts-section" *ngIf="alerts.length > 0">
+      <h2>🔔 Alertas y Notificaciones</h2>
+      <div class="alerts-grid">
+        <div 
+          *ngFor="let alert of alerts" 
+          class="alert-card"
+          [ngClass]="getAlertClass(alert.level)">
+          <div class="alert-icon">{{ getAlertIcon(alert.level) }}</div>
+          <div class="alert-content">
+            <h4>{{ alert.title }}</h4>
+            <p>{{ alert.message }}</p>
+            <small><strong>Recomendación:</strong> {{ alert.recommendation }}</small>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Gráficas -->
+    <div class="charts-grid">
+      
+      <!-- Serie Temporal -->
+      <div class="chart-card" *ngIf="timeSeries">
+        <h3>📈 Tendencia de Trámites (30 días)</h3>
+        <div class="chart-container">
+          <div class="simple-line-chart">
+            <!-- Implementar con Chart.js en producción -->
+            <p class="chart-placeholder">
+              Gráfica de líneas con {{timeSeries.labels?.length}} puntos de datos
+            </p>
+            <ul class="chart-legend">
+              <li *ngFor="let dataset of timeSeries.datasets">
+                <span class="legend-color" [style.background]="dataset.color"></span>
+                {{ dataset.label }}
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Predicciones -->
+      <div class="chart-card" *ngIf="predictions">
+        <h3>🔮 Predicciones ({{predictions.dates?.length}} días)</h3>
+        <div class="chart-container">
+          <div class="predictions-list">
+            <div 
+              *ngFor="let pred of predictions.predictions; let i = index"
+              class="prediction-item">
+              <span class="date">{{ predictions.dates[i] }}</span>
+              <div class="prediction-bar">
+                <div 
+                  class="bar-fill"
+                  [style.width.%]="pred / 30 * 100">
+                </div>
+              </div>
+              <span class="value">{{ pred | number:'1.0-1' }}</span>
+            </div>
+          </div>
+          <p class="trend-indicator">
+            <strong>Tendencia:</strong> {{ predictions.trend }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Distribución por Estado -->
+      <div class="chart-card" *ngIf="distribution">
+        <h3>🎯 Distribución por Estado</h3>
+        <div class="chart-container">
+          <div class="pie-chart">
+            <div 
+              *ngFor="let label of distribution.labels; let i = index"
+              class="pie-segment"
+              [style.background]="distribution.colors[i]"
+              [style.width.%]="distribution.percentages[i]">
+            </div>
+          </div>
+          <ul class="distribution-legend">
+            <li *ngFor="let label of distribution.labels; let i = index">
+              <span 
+                class="legend-color" 
+                [style.background]="distribution.colors[i]">
+              </span>
+              {{ label }}: {{ distribution.data[i] }} 
+              ({{ distribution.percentages[i] }}%)
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Tiempos de Procesamiento -->
+      <div class="chart-card" *ngIf="processingTime">
+        <h3>⏱ Análisis de Tiempos</h3>
+        <div class="chart-container">
+          <div class="stats-grid">
+            <div class="stat-item">
+              <span class="stat-label">Promedio</span>
+              <span class="stat-value">{{ processingTime.promedio }} días</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Mediana</span>
+              <span class="stat-value">{{ processingTime.mediana }} días</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Mínimo</span>
+              <span class="stat-value">{{ processingTime.minimo }} días</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Máximo</span>
+              <span class="stat-value">{{ processingTime.maximo }} días</span>
+            </div>
+          </div>
+          <div class="distribution-bars">
+            <div class="dist-bar">
+              <div class="bar-label">Rápido (&lt;5 días)</div>
+              <div class="bar-visual">
+                <div 
+                  class="bar-fill success"
+                  [style.width.%]="processingTime.distribucion.rapido / 30 * 100">
+                </div>
+              </div>
+              <div class="bar-count">{{ processingTime.distribucion.rapido }}</div>
+            </div>
+            <div class="dist-bar">
+              <div class="bar-label">Normal (5-10 días)</div>
+              <div class="bar-visual">
+                <div 
+                  class="bar-fill warning"
+                  [style.width.%]="processingTime.distribucion.normal / 30 * 100">
+                </div>
+              </div>
+              <div class="bar-count">{{ processingTime.distribucion.normal }}</div>
+            </div>
+            <div class="dist-bar">
+              <div class="bar-label">Lento (&gt;10 días)</div>
+              <div class="bar-visual">
+                <div 
+                  class="bar-fill danger"
+                  [style.width.%]="processingTime.distribucion.lento / 30 * 100">
+                </div>
+              </div>
+              <div class="bar-count">{{ processingTime.distribucion.lento }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Top Performers -->
+    <section class="top-performers" *ngIf="topPerformers.length > 0">
+      <h2>🏆 Mejores Desempeños</h2>
+      <div class="performers-grid">
+        <div 
+          *ngFor="let performer of topPerformers; let i = index"
+          class="performer-card"
+          [class.first]="i === 0"
+          [class.second]="i === 1"
+          [class.third]="i === 2">
+          <div class="rank">{{ i + 1 }}</div>
+          <div class="performer-info">
+            <h4>{{ performer.name }}</h4>
+            <div class="performer-stats">
+              <span>📋 {{ performer.tramites_procesados }} trámites</span>
+              <span>✓ {{ performer.tasa_exito }}% éxito</span>
+              <span>⏱ {{ performer.tiempo_promedio }} días promedio</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>

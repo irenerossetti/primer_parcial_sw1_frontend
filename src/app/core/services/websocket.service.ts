@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -79,7 +80,8 @@ export class WebSocketService {
    */
   private establishConnection(): void {
     try {
-      const socket = new (window as any).SockJS('http://localhost:8080/ws-tramites');
+      const baseUrl = environment.apiUrl.replace('/api', '');
+      const socket = new (window as any).SockJS(`${baseUrl}/ws-tramites`);
       this.stompClient = (window as any).Stomp.over(socket);
 
       this.stompClient.connect(

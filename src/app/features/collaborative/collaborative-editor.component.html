@@ -1,0 +1,111 @@
+<div class="collaborative-editor">
+  <!-- Header -->
+  <div class="editor-header">
+    <div class="header-left">
+      <h2>📝 Editor Colaborativo</h2>
+      <span class="doc-id">Documento: {{ docId }}</span>
+    </div>
+    
+    <div class="header-right">
+      <!-- Usuario actual -->
+      <div class="current-user">
+        <div class="user-avatar" [style.background]="myColor">
+          {{ getUserInitials(username) }}
+        </div>
+        <span>{{ username }}</span>
+      </div>
+
+      <!-- Estado de conexión -->
+      <div class="connection-status" [class.connected]="connected">
+        <span class="status-dot"></span>
+        {{ connected ? 'Conectado' : 'Sin conexión' }}
+      </div>
+
+      <!-- Botones -->
+      <button 
+        class="btn-connect" 
+        *ngIf="!connected"
+        (click)="connectWebSocket()">
+        🔌 Conectar
+      </button>
+
+      <button 
+        class="btn-save" 
+        (click)="saveSnapshot()"
+        [disabled]="loading">
+        💾 Guardar
+      </button>
+
+      <button 
+        class="btn-history" 
+        (click)="viewHistory()">
+        📜 Historial
+      </button>
+    </div>
+  </div>
+
+  <!-- Usuarios activos -->
+  <div class="active-users-bar" *ngIf="activeUsers.length > 0">
+    <span class="users-label">
+      👥 {{ activeUsers.length }} usuario{{ activeUsers.length !== 1 ? 's' : '' }} activo{{ activeUsers.length !== 1 ? 's' : '' }}:
+    </span>
+    <div class="users-list">
+      <div 
+        *ngFor="let user of activeUsers"
+        class="user-badge"
+        [style.background]="user.color"
+        [title]="user.username">
+        {{ getUserInitials(user.username) }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Última guardada -->
+  <div class="save-indicator" *ngIf="lastSaved">
+    <span>✓ Guardado automáticamente: {{ lastSaved | date:'short' }}</span>
+  </div>
+
+  <!-- Error -->
+  <div class="error-banner" *ngIf="error">
+    <span>❌ {{ error }}</span>
+    <button (click)="error = null">✕</button>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-overlay" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Cargando...</p>
+  </div>
+
+  <!-- Editor de texto -->
+  <div class="editor-container">
+    <textarea
+      class="editor-textarea"
+      [(ngModel)]="content"
+      (ngModelChange)="onContentChange()"
+      [disabled]="loading"
+      placeholder="Escribe aquí tu documento colaborativo...">
+    </textarea>
+  </div>
+
+  <!-- Info bar -->
+  <div class="info-bar">
+    <span>{{ content.length }} caracteres</span>
+    <span *ngIf="isDirty" class="dirty-indicator">● Sin guardar</span>
+    <span *ngIf="!connected" class="offline-indicator">
+      ⚠️ Modo sin tiempo real (usar HTTP)
+    </span>
+  </div>
+
+  <!-- Instrucciones -->
+  <div class="instructions" *ngIf="!connected">
+    <h4>💡 Instrucciones:</h4>
+    <ul>
+      <li>Click en "Conectar" para activar edición en tiempo real con WebSocket</li>
+      <li>Los cambios se guardan automáticamente cada segundo</li>
+      <li>Puedes ver quién está editando en la barra superior</li>
+      <li>Click en "Guardar" para crear un snapshot manual</li>
+      <li>Click en "Historial" para ver cambios anteriores</li>
+    </ul>
+  </div>
+</div>

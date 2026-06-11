@@ -1,3 +1,4 @@
+import { environment } from '../../../environments/environment';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -56,7 +57,7 @@ export interface TramiteEjecucion {
 
 @Injectable({ providedIn: 'root' })
 export class TramiteService {
-  private apiUrl = 'http://localhost:8080/api/tramites';
+  private apiUrl = `${environment.apiUrl}/tramites`;
 
   constructor(private http: HttpClient) {}
 

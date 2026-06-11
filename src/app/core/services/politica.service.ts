@@ -1,3 +1,4 @@
+import { environment } from '../../../environments/environment';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -12,7 +13,7 @@ export interface Politica {
 
 @Injectable({ providedIn: 'root' })
 export class PoliticaService {
-  private apiUrl = 'http://localhost:8080/api/politicas';
+  private apiUrl = `${environment.apiUrl}/politicas`;
 
   constructor(private http: HttpClient) {}
 
